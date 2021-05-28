@@ -12,16 +12,27 @@ public class Location {
     /**
      * Gets the ground distance in metres between two LatLon objects.
      *
-     * This method is an approximation, and will not be accurate over large distances and close to the
-     * earth's poles.
+     * This method is way better than what we were using previously.
+     * It uses the 'haversine' formula.
      *
      * @param other the other point to measure distance to
      * @return the distance from this point to the other point
      */
     public double getDistanceTo(Location other) {
-        double dlat = other.latitude - this.latitude;
-        double dlon = other.longitude - this.longitude;
+        double lat1 = this.latitude, lat2 = other.latitude;
+        double lon1 = this.longitude, lon2 = other.longitude;
 
-        return Math.sqrt((dlat * dlat) + (dlon * dlon))  * 1.113195e5;
+        double r = 6371e3; // radius, in metres
+        double phi1 = lat1 * Math.PI/180; // φ, λ in radians
+        double phi2 = lat2 * Math.PI/180;
+        double deltaPhi = (lat2-lat1) * Math.PI/180;
+        double deltaLambda = (lon2-lon1) * Math.PI/180;
+
+        double a = Math.sin(deltaPhi/2) * Math.sin(deltaPhi/2) +
+                        Math.cos(phi1) * Math.cos(phi2) *
+                                Math.sin(deltaLambda/2) * Math.sin(deltaLambda/2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+        return r * c; // in metres
     }
 }

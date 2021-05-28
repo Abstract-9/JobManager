@@ -36,6 +36,7 @@ import org.apache.kafka.streams.processor.api.Processor;
 import org.apache.kafka.streams.processor.api.ProcessorContext;
 import org.apache.kafka.streams.processor.api.Record;
 import org.apache.kafka.streams.state.KeyValueStore;
+import org.apache.kafka.streams.state.Stores;
 
 import static com.jamz.jobManager.JobManager.Constants.*;
 
@@ -51,7 +52,7 @@ public class JobManager {
 
     public static void main(String[] args) {
         Properties props = new Properties();
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "streams-landing-bay-manager");
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "streams-job-manager");
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "confluent:9092");
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, JSONSerde.class);
@@ -79,10 +80,16 @@ public class JobManager {
         topBuilder.addProcessor(REQUEST_PROCESSOR_NAME, JobRequestProcessor::new, JOB_REQUEST_TOPIC)
                 .addProcessor(BID_PROCESSOR_NAME, BidProcessor::new, BID_INPUT_NAME);
 
+        topBuilder.addStateStore(Stores.keyValueStoreBuilder(
+                Stores.persistentKeyValueStore(BID_STORE_NAME),
+                Serdes.String(),
+                jsonSerde
+        ), BID_PROCESSOR_NAME);
+
         topBuilder.connectProcessorAndStateStores(BID_PROCESSOR_NAME, DRONE_STORE_NAME);
 
-        topBuilder.addSink(BID_OUTPUT_NAME, BID_TOPIC);
-
+        topBuilder.addSink(BID_OUTPUT_NAME, BID_TOPIC, REQUEST_PROCESSOR_NAME)
+                .addSink(JOB_ASSIGNMENT_TOPIC, JOB_ASSIGNMENT_TOPIC, BID_PROCESSOR_NAME);
 
         return topBuilder;
     }
@@ -151,11 +158,13 @@ public class JobManager {
         public static final String DRONE_STATUS_TOPIC = "DroneStatus";
 
         // Internal names
+        public static final String JOB_ASSIGNMENT_TOPIC = "JobAssignments";
         public static final String BID_INPUT_NAME = "BidInput";
         public static final String BID_OUTPUT_NAME = "BidOutput";
         public static final String REQUEST_PROCESSOR_NAME = "RequestProcessor";
         public static final String BID_PROCESSOR_NAME = "BidProcessor";
         public static final String DRONE_STORE_NAME = "DroneStateStore";
+        public static final String BID_STORE_NAME = "BidStore";
 
     }
 }
