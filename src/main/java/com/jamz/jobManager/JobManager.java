@@ -156,9 +156,9 @@ public class JobManager {
         public static final String JOB_REQUEST_TOPIC = "JobRequests";
         public static final String BID_TOPIC = "JobBids";
         public static final String DRONE_STATUS_TOPIC = "DroneStatus";
+        public static final String JOB_ASSIGNMENT_TOPIC = "JobAssignments";
 
         // Internal names
-        public static final String JOB_ASSIGNMENT_TOPIC = "JobAssignments";
         public static final String BID_INPUT_NAME = "BidInput";
         public static final String BID_OUTPUT_NAME = "BidOutput";
         public static final String REQUEST_PROCESSOR_NAME = "RequestProcessor";
