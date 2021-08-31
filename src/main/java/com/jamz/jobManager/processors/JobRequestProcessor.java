@@ -67,15 +67,15 @@ public class JobRequestProcessor implements Processor<String, JsonNode, String, 
         for (JsonNode waypoint : waypoints) {
             if (previousLocation == null) {
                 previousLocation = new Location(
-                        waypoint.get("geometry").get("latitude").doubleValue(),
-                        waypoint.get("geometry").get("longitude").doubleValue(),
+                        waypoint.get("geometry").get("lat").doubleValue(),
+                        waypoint.get("geometry").get("lng").doubleValue(),
                         0
                 );
                 continue;
             }
             Location current = new Location(
-                    waypoint.get("geometry").get("latitude").doubleValue(),
-                    waypoint.get("geometry").get("longitude").doubleValue(),
+                    waypoint.get("geometry").get("lat").doubleValue(),
+                    waypoint.get("geometry").get("lng").doubleValue(),
                     0
             );
             totalDistance += current.getDistanceTo(previousLocation);

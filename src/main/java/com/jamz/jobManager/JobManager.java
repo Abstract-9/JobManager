@@ -20,6 +20,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.jamz.jobManager.processors.BidProcessor;
 import com.jamz.jobManager.processors.JobRequestProcessor;
 import com.jamz.jobManager.serdes.JSONSerde;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -53,7 +55,18 @@ public class JobManager {
     public static void main(String[] args) {
         Properties props = new Properties();
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, "streams-job-manager");
-        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "confluent:9092");
+        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "pkc-419q3.us-east4.gcp.confluent.cloud:9092");
+        // Security Config
+        props.put(StreamsConfig.SECURITY_PROTOCOL_CONFIG, "SASL_SSL");
+        props.put(SaslConfigs.SASL_MECHANISM, "PLAIN");
+        props.put(SaslConfigs.SASL_JAAS_CONFIG, "org.apache.kafka.common.security.plain.PlainLoginModule required " +
+                "username=\"PSAFM6VH7LWNGV5D\" password=\"DfAiu9RSyI/udfvUm9j3HUtxHEECfrR9+K7tE8NTCI5g1x2am9ZkRfFWUSf+uT8G\";");
+        // Performance Config
+        props.put(StreamsConfig.producerPrefix(ProducerConfig.RETRIES_CONFIG), 2147483647);
+        props.put("producer.confluent.batch.expiry.ms", 9223372036854775807L);
+        props.put(StreamsConfig.producerPrefix(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG), 300000);
+        props.put(StreamsConfig.producerPrefix(ProducerConfig.MAX_BLOCK_MS_CONFIG), 9223372036854775807L);
+        // Serdes Config
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, JSONSerde.class);
 
@@ -70,7 +83,7 @@ public class JobManager {
 
         final StreamsBuilder streamBuilder = new StreamsBuilder();
 
-        streamBuilder.table(DRONE_STATUS_TOPIC, consumed, Materialized.as(DRONE_STORE_NAME));
+        streamBuilder.globalTable(DRONE_STATUS_TOPIC, consumed, Materialized.as(DRONE_STORE_NAME));
 
         final Topology topBuilder = streamBuilder.build();
 
@@ -80,13 +93,13 @@ public class JobManager {
         topBuilder.addProcessor(REQUEST_PROCESSOR_NAME, JobRequestProcessor::new, JOB_REQUEST_TOPIC)
                 .addProcessor(BID_PROCESSOR_NAME, BidProcessor::new, BID_INPUT_NAME);
 
+        // Logging is disabled on all state stores for dev. Since this removes fault tolerance, it needs to be enabled
+        // in prod.
         topBuilder.addStateStore(Stores.keyValueStoreBuilder(
                 Stores.persistentKeyValueStore(BID_STORE_NAME),
                 Serdes.String(),
                 jsonSerde
-        ), BID_PROCESSOR_NAME);
-
-        topBuilder.connectProcessorAndStateStores(BID_PROCESSOR_NAME, DRONE_STORE_NAME);
+        ).withLoggingDisabled(), BID_PROCESSOR_NAME);
 
         topBuilder.addSink(BID_OUTPUT_NAME, BID_TOPIC, REQUEST_PROCESSOR_NAME)
                 .addSink(JOB_ASSIGNMENT_TOPIC, JOB_ASSIGNMENT_TOPIC, BID_PROCESSOR_NAME);
@@ -156,7 +169,7 @@ public class JobManager {
         public static final String JOB_REQUEST_TOPIC = "JobRequests";
         public static final String BID_TOPIC = "JobBids";
         public static final String DRONE_STATUS_TOPIC = "DroneStatus";
-        public static final String JOB_ASSIGNMENT_TOPIC = "JobAssignments";
+        public static final String JOB_ASSIGNMENT_TOPIC = "JobAssignment";
 
         // Internal names
         public static final String BID_INPUT_NAME = "BidInput";

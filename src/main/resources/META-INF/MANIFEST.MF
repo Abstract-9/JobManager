@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Main-Class: com.jamz.jobManager.JobManager
+Class-Path: lib/junit-jupiter-5.7.1.jar lib/log4j-1.2.17.jar lib/jackson
+ -datatype-jdk8-2.10.5.jar lib/connect-api-2.8.0.jar lib/zstd-jni-1.4.9-
+ 1.jar lib/kafka-clients-2.8.0.jar lib/jackson-core-2.10.5.jar lib/jacks
+ on-annotations-2.10.5.jar lib/opentest4j-1.2.0.jar lib/junit-jupiter-pa
+ rams-5.7.1.jar lib/apiguardian-api-1.1.0.jar lib/rocksdbjni-5.18.4.jar 
+ lib/junit-platform-commons-1.7.1.jar lib/junit-jupiter-api-5.7.1.jar li
+ b/connect-json-2.8.0.jar lib/kafka-streams-test-utils-2.8.0.jar lib/jun
+ it-jupiter-engine-5.7.1.jar lib/slf4j-log4j12-1.7.30.jar lib/kafka-stre
+ ams-2.8.0.jar lib/jackson-databind-2.10.5.1.jar lib/lz4-java-1.7.1.jar 
+ lib/snappy-java-1.1.8.1.jar lib/junit-platform-engine-1.7.1.jar lib/slf
+ 4j-api-1.7.30.jar
+

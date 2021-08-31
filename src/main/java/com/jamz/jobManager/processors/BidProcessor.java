@@ -60,6 +60,7 @@ public class BidProcessor implements Processor<String, JsonNode, String, JsonNod
         // Basically, drones that are online and capable of completing the job will say that they bid.
         // We need to take the status of that drone (from the drone status topic), convert it into a numerical bid using
         // our special formula, and choose the highest bid to do the job.
+        if (!record.value().has("eventType")) return;
         String eventType = record.value().get("eventType").textValue();
         if (eventType.equals("AuctionClose")) return;
 

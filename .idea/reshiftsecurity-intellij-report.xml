@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ReshiftSecurity-Intellij-Report">
+    <isGitProject>true</isGitProject>
+    <gitBranch>main</gitBranch>
+    <projectName>JobManager</projectName>
+    <securityIssues />
+  </component>
+</project>
