@@ -44,7 +44,8 @@ public class BidProcessor implements Processor<String, JsonNode, String, JsonNod
                     if (value.get("highest_bid").intValue() > 0) {
                         ObjectNode result = new ObjectNode(factory);
                         result.put("drone_id", value.get("highest_bid_id").textValue())
-                                .put("eventType", "AuctionClose");
+                                .put("eventType", "JobAssignmentRequest")
+                                .set("job_waypoints", value.get("job_waypoints"));
                         this.context.forward(new Record<String, JsonNode>(
                                 auction.key, result, System.currentTimeMillis()
                         ), JOB_ASSIGNMENT_TOPIC);
@@ -62,7 +63,6 @@ public class BidProcessor implements Processor<String, JsonNode, String, JsonNod
         // our special formula, and choose the highest bid to do the job.
         if (!record.value().has("eventType")) return;
         String eventType = record.value().get("eventType").textValue();
-        if (eventType.equals("AuctionClose")) return;
 
         if(eventType.equals("AuctionOpen")) {
             ObjectNode auction = new ObjectNode(factory);
@@ -70,6 +70,7 @@ public class BidProcessor implements Processor<String, JsonNode, String, JsonNod
             auction.put("highest_bid", 0);
             auction.put("highest_bid_id", "0x0");
             auction.put("open_time", record.timestamp());
+            auction.set("job_waypoints", record.value().get("job_waypoints"));
 
             this.store.put(record.key(), auction);
         } else if (eventType.equals("BidsPlaced")) {
