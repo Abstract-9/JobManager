@@ -83,6 +83,7 @@ public class BidProcessor implements Processor<String, JsonNode, String, JsonNod
                 }
             }
             ObjectNode auction = (ObjectNode) this.store.get(record.key());
+            if (auction == null) return; // Invalid job ID's can be received from stale jobs or catching-up processors.
             if (highestBidID != null && highestBid > auction.get("highest_bid").intValue()) {
                 auction.put("highest_bid", highestBid);
                 auction.put("highest_bid_id", highestBidID);
